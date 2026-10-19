@@ -1,93 +1,26 @@
-<?php
-// 1. Подключение к БД
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$dbname = 'shop';
-$connect = new mysqli($host, $user, $pass, $dbname);
-
-if ($connect->connect_error) {
-    die('Ошибка подключения: ' . $connect->connect_error);
-}
-$connect->set_charset("utf8mb4");
-
-// 2. Запрос на получение всех товаров с категориями и брендами
-$sql = "SELECT 
-            p.id, 
-            p.name, 
-            p.price, 
-            p.rating, 
-            p.stock, 
-            pi.image as image,
-            c.name as category_name,
-            b.name as brand_name
-        FROM products p
-        LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
-        LEFT JOIN categories c ON c.id = p.category_id
-        LEFT JOIN brands b ON b.id = p.brand_id
-        ORDER BY p.id DESC"; // Сортируем по убыванию ID (новые сверху)
-
-$result = $connect->query($sql);
-
-if (!$result) {
-    die('Ошибка запроса: ' . $connect->error);
-}
-
-// Получаем все товары в массив
-$products = $result->fetch_all(MYSQLI_ASSOC);
-?>
-
-<link rel="stylesheet" href="../css/style.css"> <!-- Обратите внимание на ../ (если css в корне) -->
-
-<section class="panel">
-    <div class="panel-header">
-        <h2>Список товаров</h2>
-    </div>
+<ul>
+    <!-- Панель управления -->
+    <li class="<?= ($current_page == 'index.php') ? 'active' : '' ?>">
+        <a href="index.php"><span>📊</span>Панель управления</a>
+    </li>
     
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Фото</th>
-                <th>Название</th>
-                <th>Категория</th>
-                <th>Бренд</th>
-                <th>Цена</th>
-                <th>Рейтинг</th>
-                <th>Остаток</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (!empty($products)): ?>
-                <?php foreach ($products as $product): ?>
-                    <tr>
-                        <td>
-                            <img src="../img/products/<?= htmlspecialchars($product['image'] ?? 'no-image.jpg') ?>" 
-                                 alt="<?= htmlspecialchars($product['name']) ?>" 
-                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                        </td>
-                        <td><?= htmlspecialchars($product['name']) ?></td>
-                        
-                        <!-- Выводим названия, а не ID -->
-                        <td><?= htmlspecialchars($product['category_name'] ?? '—') ?></td>
-                        <td><?= htmlspecialchars($product['brand_name'] ?? '—') ?></td>
-                        
-                        <td><?= number_format($product['price'], 0, '', ' ') ?> ₽</td>
-                        <td><?= $product['rating'] ?></td>
-                        <td><?= $product['stock'] ?? '0' ?> шт.</td>
-                        
-                        <td>
-                            <!-- Кнопки действий -->
-                            <button class="btn-edit" title="Редактировать">✏️</button>
-                            <button class="btn-delete" title="Удалить">🗑️</button>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="8" style="text-align: center;">Товаров пока нет.</td>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
-</section>
+    <!-- Товары (подсвечивается и при редактировании) -->
+    <li class="<?= ($current_page == 'products.php' || $current_page == 'productedit.php') ? 'active' : '' ?>">
+        <a href="products.php"><span>📦</span>Товары</a>
+    </li>
+    
+    <!-- Категории -->
+    <li class="<?= ($current_page == 'category.php') ? 'active' : '' ?>">
+        <a href="category.php"><span>📁</span>Категории</a>
+    </li>
+    
+    <!-- Бренды -->
+    <li class="<?= ($current_page == 'brands.php') ? 'active' : '' ?>">
+        <a href="brands.php"><span>🏷️</span>Бренды</a>
+    </li>
+    
+    <!-- Изображения -->
+    <li class="<?= ($current_page == 'images.php') ? 'active' : '' ?>">
+        <a href="images.php"><span>🖼️</span>Изображения</a>
+    </li>
+</ul>
